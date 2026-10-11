@@ -3,40 +3,79 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>fairflow pages index</title>
+<title>fairflow projects</title>
 <style>
-body{font-family:sans-serif;max-width:40rem;margin:2rem auto;padding:0 1rem}
-li{margin:.4rem 0}
+:root { color-scheme: light dark; }
+body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 42rem; margin: 2.5rem auto; padding: 0 1rem; }
+h1 { font-size: 1.6rem; margin-bottom: .25rem; }
+h2 { font-size: 1.1rem; margin-top: 2rem; }
+p.lead { margin-top: 0; opacity: .75; }
+ul { list-style: none; padding: 0; }
+li { margin: 1rem 0; }
+li a { font-weight: 600; font-size: 1.05rem; }
+li span { display: block; opacity: .8; }
+footer { margin-top: 2.5rem; font-size: .85rem; opacity: .65; }
 </style>
 </head>
 <body>
-<h1>Fairflow projects</h1>
-<p>Index of all GitHub Pages sites deployed under <code>projects.fairflow.co.uk</code>.</p>
+<h1>fairflow projects</h1>
+<p class="lead">Sites published by Matthew Fairtlough under <code>projects.fairflow.co.uk</code>.</p>
+
+<!-- 1. KEPT BY HAND. Sites built from private repositories: the automatic
+     list below cannot discover these. To add one, copy an <li> and change
+     the address, the name and the description. -->
+<h2>Projects</h2>
+<ul>
+  <li>
+    <a href="/locus/">locus</a>
+    <span>Blueprint: steps towards a programming language for signers, built on Milner's bigraphs in Lean.</span>
+  </li>
+  <li>
+    <a href="/writing/">AI Writing and Tools</a>
+    <span>Writing, especially on AI-related issues, with code and discussions.</span>
+  </li>
+</ul>
+
+<!-- 2. AUTOMATIC. Every public repository of the account that has a Pages
+     site, except the names in EXCLUDE. -->
+<h2>Public repositories</h2>
 <ul id="sites"><li>Loading…</li></ul>
+
+<footer>Source repositories: <a href="https://github.com/fairflow">github.com/fairflow</a></footer>
+
 <script>
 (function () {
+  // Repositories never to list: this site itself, and forks or clones
+  // that are marked as having Pages but publish nothing here.
+  var EXCLUDE = ['fairflow.github.io', 'cantors-attic'];
+
   var list = document.getElementById('sites');
-  var base = location.origin;
   function render(repos) {
     list.textContent = '';
-    repos.filter(function (r) { return r.has_pages && r.name !== 'fairflow.github.io'; })
+    repos
+      .filter(function (r) { return r.has_pages && EXCLUDE.indexOf(r.name) < 0; })
       .sort(function (a, b) { return a.name.localeCompare(b.name); })
       .forEach(function (r) {
         var li = document.createElement('li');
         var a = document.createElement('a');
-        a.href = base + '/' + encodeURIComponent(r.name) + '/';
+        a.href = '/' + encodeURIComponent(r.name) + '/';
         a.textContent = r.name;
         li.appendChild(a);
-        if (r.description) li.appendChild(document.createTextNode(' - ' + r.description));
+        if (r.description) {
+          var s = document.createElement('span');
+          s.textContent = r.description;
+          li.appendChild(s);
+        }
         list.appendChild(li);
       });
-    if (!list.children.length) list.innerHTML = '<li>No Pages sites found.</li>';
+    if (!list.children.length) list.innerHTML = '<li>No public sites found.</li>';
   }
   fetch('https://api.github.com/users/fairflow/repos?per_page=100&sort=full_name')
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(render)
     .catch(function () {
-      list.innerHTML = '<li>Could not load the repository list from GitHub.</li>';
+      list.innerHTML = '<li>Could not load the list from GitHub. ' +
+        'See <a href="https://github.com/fairflow">github.com/fairflow</a>.</li>';
     });
 })();
 </script>
