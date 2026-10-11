@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fairflow pages index</title>
+<style>
+body{font-family:sans-serif;max-width:40rem;margin:2rem auto;padding:0 1rem}
+li{margin:.4rem 0}
+</style>
+</head>
+<body>
+<h1>fairflow pages</h1>
+<p>Index of all GitHub Pages sites deployed under <code>pages.fairflow.co.uk</code>.</p>
+<ul id="sites"><li>Loading…</li></ul>
+<script>
+(function () {
+  var list = document.getElementById('sites');
+  var base = location.origin;
+  function render(repos) {
+    list.textContent = '';
+    repos.filter(function (r) { return r.has_pages && r.name !== 'fairflow.github.io'; })
+      .sort(function (a, b) { return a.name.localeCompare(b.name); })
+      .forEach(function (r) {
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.href = base + '/' + encodeURIComponent(r.name) + '/';
+        a.textContent = r.name;
+        li.appendChild(a);
+        if (r.description) li.appendChild(document.createTextNode(' - ' + r.description));
+        list.appendChild(li);
+      });
+    if (!list.children.length) list.innerHTML = '<li>No Pages sites found.</li>';
+  }
+  fetch('https://api.github.com/users/fairflow/repos?per_page=100&sort=full_name')
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(render)
+    .catch(function () {
+      list.innerHTML = '<li>Could not load the repository list from GitHub.</li>';
+    });
+})();
+</script>
+</body>
+</html>
